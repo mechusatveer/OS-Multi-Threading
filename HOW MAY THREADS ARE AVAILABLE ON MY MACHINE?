@@ -1,0 +1,65 @@
+Theoretically, to come up with the possible number of threads available on our machine, 
+we can use the stack size and size of the virtual space (swap):
+
+no of threads = virtual space/stack size default
+
+So, if a machine of 20GB swap size and default stack size (we can use "ulimit -s" to check it)
+of 10MB, we can have 2,000 threads. However, we will have performance hit well before it.
+
+Though there are some debates on scalability of threads with the performance, the rule of thumb 
+may be the number of threads should match the number processors.
+
+If we use cat /proc/cpuinfo on linux system, we will get the number of processors.
+That should be the optimum number of threads we should use.
+
+processor       : 0
+vendor_id       : GenuineIntel
+cpu family      : 6
+model           : 26
+model name      : Intel(R) Xeon(R) CPU           E5520  @ 2.27GHz
+stepping        : 5
+cpu MHz         : 1596.000
+cache size      : 8192 KB
+physical id     : 1
+siblings        : 8
+core id         : 0
+cpu cores       : 4
+
+.....
+.....
+.....
+
+processor       : 15
+vendor_id       : GenuineIntel
+cpu family      : 6
+model           : 26
+model name      : Intel(R) Xeon(R) CPU           E5520  @ 2.27GHz
+stepping        : 5
+cpu MHz         : 1596.000
+cache size      : 8192 KB
+physical id     : 0
+siblings        : 8
+core id         : 3
+cpu cores       : 4
+apicid          : 7
+fpu             : yes
+fpu_exception   : yes
+cpuid level     : 11
+wp              : yes
+bogomips        : 4522.03
+clflush size    : 64
+cache_alignment : 64
+address sizes   : 40 bits physical, 48 bits virtual
+power management:
+
+
+The important parameters are:
+
+processor : 0-15
+physical id : 0-1
+siblings : 8
+cpu cores : 4
+The machine is using hyper-thread. We know this because the siblings (8) is double the number
+of cpu cores (4). If not hyper-thread, siblings should be equal to cpu cores. So, we have 8 
+processors (4 cores x hyperthread(2) = 8) for each cpu package (physical id = 0, 1), which 
+give us 8 x 2 = 16 processors.
